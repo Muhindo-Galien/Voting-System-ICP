@@ -1,4 +1,4 @@
-type Error = variant { InsertFailed; VoteNotFoundError };
+type Error = variant { InsertFailed; InvalidInput; VoteNotFound };
 type Result = variant { Ok : Vote; Err : Error };
 type Result_1 = variant { Ok; Err : Error };
 type Result_2 = variant { Ok : vec record { text; nat64 }; Err : Error };
