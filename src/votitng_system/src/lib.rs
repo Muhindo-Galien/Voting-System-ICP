@@ -17,7 +17,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 #[derive(candid::CandidType, Deserialize, Serialize, Debug)]
 enum Error {
-    InvalidInput,
+    InvalidInput(String),
     InsertFailed,
     VoteNotFound,
 }
@@ -68,7 +68,7 @@ impl BoundedStorable for Vote {
 #[ic_cdk::update]
 fn add_vote(candidate: String, voter: String) -> Result<Vote> {
     if candidate.is_empty() || voter.is_empty() {
-        return Err(Error::InvalidInput);
+        return Err(Error::InvalidInput("Candidate and voter cannot be empty".to_string()));
     }
 
     let id = ID_COUNTER
@@ -95,7 +95,7 @@ fn add_vote(candidate: String, voter: String) -> Result<Vote> {
 #[ic_cdk::update]
 fn update_vote(id: u64, candidate: String, voter: String) -> Result<Vote> {
     if candidate.is_empty() || voter.is_empty() {
-        return Err(Error::InvalidInput);
+        return Err(Error::InvalidInput("Candidate and voter cannot be empty".to_string()));
     }
 
     let mut vote = VOTES
@@ -278,7 +278,12 @@ fn insert(vote: &Vote) {
 }
 
 fn get_vote_by_candidate_voter(candidate: &str, voter: &str) -> Option<Vote> {
-    VOTES.with(|votes| votes.borrow().iter().find(|(_, v)| v.candidate == *candidate && v.voter == *voter).map(|(_, v)| v.clone()))
+    VOTES.with(|votes| {
+        votes.borrow()
+            .iter()
+            .find(|(_, v)| v.candidate == candidate && v.voter == voter)
+            .map(|(_, v)| v.clone())
+    })
 }
 // endregion --- HELPER FN
 
